@@ -1,0 +1,9 @@
+{
+  "readability_token":"123",
+   "redis": {
+     "domain": "localhost:6379",
+     "database": "0",
+     "pool": "30",
+     "process": "1"
+   }
+}

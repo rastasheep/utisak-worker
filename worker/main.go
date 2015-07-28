@@ -1,34 +1,36 @@
 package main
 
 import (
-	"fmt"
-	"log"
-	"os"
 	"time"
+
+	log "github.com/rastasheep/utisak-worker/log"
 
 	"github.com/SlyMarbo/rss"
 	"github.com/jrallison/go-workers"
 	"gopkg.in/robfig/cron.v2"
 )
 
-var CronLogger = NewLogger("cron")
-var JobLogger = NewLogger("job")
-var Conf = LoadConfig()
-
-func NewLogger(name string) *log.Logger {
-	return log.New(os.Stdout, fmt.Sprintf("%s: ", name), log.Ldate|log.Lmicroseconds|log.Lshortfile)
-}
-
-var Urls = []string{
-	"http://www.politika.rs/rubrike/Sport/index.1.lt.xml",
-}
+var (
+	config       *Config
+	logger       log.Logger
+	feedRegistry *FeedRegistry
+	Urls         = []string{
+		"http://www.politika.rs/rubrike/Sport/index.1.lt.xml",
+	}
+)
 
 func main() {
+	log.LogTo("stdout", "DEBUG")
+	logger = log.NewPrefixLogger("MAIN")
+
+	config = LoadConfig()
+	feedRegistry = NewFeedRegistry(config.FeedRegistryPath)
+
 	workers.Configure(map[string]string{
-		"server":   Conf.Redis.Domain,
-		"database": Conf.Redis.Database,
-		"pool":     Conf.Redis.Pool,
-		"process":  Conf.Redis.Process,
+		"server":   config.Redis.Domain,
+		"database": config.Redis.Database,
+		"pool":     config.Redis.Pool,
+		"process":  config.Redis.Process,
 	})
 
 	workers.Middleware.Append(&workers.MiddlewareRetry{})
@@ -49,23 +51,23 @@ func startCron() {
 }
 
 func pullFeeds() {
-	CronLogger.Println("Starting to pull feeds")
+	logger.Info("Starting to pull feeds")
 
 	for _, url := range Urls {
 		fetchFeed(url)
 	}
 
-	CronLogger.Println("Finished pulling feeds")
+	log.Info("Finished pulling feeds")
 }
 
 func fetchFeed(url string) {
-	CronLogger.Printf("Stearted fetching field: %s\n", url)
+	logger.Info("Stearted fetching field: %s", url)
 
 	rss.CacheParsedItemIDs(false)
 	feed, _ := rss.Fetch(url)
 
-	CronLogger.Printf("Finished fetching field: %s\n", url)
-	CronLogger.Printf("There are %d items in %s\n", len(feed.Items), url)
+	logger.Info("Finished fetching field: %s", url)
+	logger.Info("There are %d items in %s", len(feed.Items), url)
 
 	fetchNewItems(feed.Items)
 }
@@ -75,8 +77,8 @@ func fetchNewItems(items []*rss.Item) {
 
 	for _, item := range items {
 		if item.Date.UTC().After(start) {
-			CronLogger.Println("Enquing new item")
-			workers.Enqueue("article_fetching", "Add", item)
+			logger.Info("Enquing new item")
+			logger.Info("article_fetching", "Add", item)
 		}
 	}
 }
@@ -89,5 +91,5 @@ func articleFetchingJob(message *workers.Msg) {
 		panic(err)
 	}
 
-	JobLogger.Printf("Successfully created article: %+v\n", article)
+	logger.Info("Successfully created article: %+v\n", article)
 }

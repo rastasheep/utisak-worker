@@ -9,6 +9,7 @@ import (
 
 type Config struct {
 	ReadabilityToken string `json:"readability_token"`
+	FeedRegistryPath string `json:"feed_registry_path"`
 	RedisDomain      string
 	Redis            struct {
 		Domain   string // location of redis instance
@@ -18,7 +19,7 @@ type Config struct {
 	}
 }
 
-var configPath = flag.String("config", "config/config.json", "Path to file containing application ids and credentials for other services.")
+var configPath = flag.String("config", "worker/config/config.json", "Path to file containing application ids and credentials for other services.")
 
 func LoadConfig() *Config {
 	config := Config{}

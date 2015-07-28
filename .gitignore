@@ -24,5 +24,4 @@ _testmain.go
 *.prof
 
 # App specific
-utisak-worker
-config/config.json
+worker/config/config.json

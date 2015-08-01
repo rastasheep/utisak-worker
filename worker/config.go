@@ -16,10 +16,17 @@ type Config struct {
 	FeedRegistryPath string
 	RedisDomain      string
 	Redis            struct {
-		Domain   string // location of redis instance
-		Database string // instance of the database
-		Pool     string // number of connections to keep open with redis
-		Process  string // unique process id for this instance of workers (for proper recovery of inprogress jobs on crash)
+		Domain   string
+		Database string
+		Pool     string
+		Process  string
+	}
+	Postgres struct {
+		Host     string
+		Port     string
+		Database string
+		Username string
+		Password string
 	}
 }
 
@@ -46,4 +53,14 @@ func (config *Config) RedisConfig() map[string]string {
 		"pool":     config.Redis.Pool,
 		"process":  config.Redis.Process,
 	}
+}
+
+func (config *Config) PostgresConfig() string {
+	return fmt.Sprintf("sslmode=disable host=%s port=%s dbname=%s user=%s password=%s",
+		config.Postgres.Host,
+		config.Postgres.Port,
+		config.Postgres.Database,
+		config.Postgres.Username,
+		config.Postgres.Password,
+	)
 }

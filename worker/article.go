@@ -3,7 +3,11 @@ package main
 import "time"
 
 type Article struct {
-	ID        string
+	// gorm.Model
+	ID        uint `gorm:"primary_key"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+
 	Title     string
 	Domain    string
 	Url       string
@@ -17,4 +21,11 @@ type Article struct {
 
 func (article *Article) FetchDetails() error {
 	return ReadabilityParse(article.Url, article)
+}
+
+func LatestArticle() *Article {
+	var article Article
+
+	db.Order("date desc").Limit(1).Find(&article)
+	return &article
 }

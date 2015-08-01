@@ -68,6 +68,7 @@ func articleFetchingJob(message *workers.Msg) {
 
 	article := item.NewArticle()
 	article.FetchDetails()
+	db.Create(&article)
 
 	logger.Info("Successfully created article: %+v\n", article)
 }
@@ -81,6 +82,7 @@ func newDb() *gorm.DB {
 		panic(fmt.Sprintf("Unable to connect to postgres: %s", err))
 	}
 
+	db.LogMode(true)
 	db.AutoMigrate(&Article{})
 	return &db
 }

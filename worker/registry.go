@@ -1,10 +1,6 @@
 package main
 
-import (
-	"time"
-
-	log "github.com/rastasheep/utisak-worker/log"
-)
+import log "github.com/rastasheep/utisak-worker/log"
 
 type FeedRegistry struct {
 	feeds []*Feed
@@ -23,8 +19,10 @@ func NewFeedRegistry(sourcePath string) *FeedRegistry {
 func (registry *FeedRegistry) FetchFeeds(action func(*FeedItem)) {
 	for _, feed := range registry.feeds {
 		feed.Fetch()
-		//latestArticle =
-		start, _ := time.Parse(time.RFC822, "24 Jul 15 18:00 UTC")
-		feed.ProcessNewItems(start, action)
+
+		article := LatestArticle()
+
+		logger.Info("Last article: ID: %b, Url: %s", article.ID, article.Url)
+		feed.ProcessNewItems(article.Date, action)
 	}
 }

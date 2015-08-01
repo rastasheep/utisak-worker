@@ -25,10 +25,10 @@ func (feed *Feed) ProcessNewItems(latest time.Time, action func(*FeedItem)) {
 	for _, item := range feed.rawData.Items {
 		feedItem := &FeedItem{*item}
 
-		if feedItem.Date.UTC().After(latest) {
+		logger.Info("Checking item time: %v latest: %v", feedItem.Date.UTC(), latest.UTC())
+		if feedItem.Date.UTC().After(latest.UTC()) {
 			logger.Info("Enquing new item")
 			action(feedItem)
-			logger.Info("article_fetching", "Add", feedItem)
 		}
 	}
 }
@@ -39,7 +39,7 @@ type FeedItem struct {
 
 func (feed *FeedItem) NewArticle() *Article {
 	return &Article{
-		ID:      feed.ID,
+		//ID:      feed.ID,
 		Title:   feed.Title,
 		Url:     feed.Link,
 		Excerpt: feed.Summary,

@@ -1,11 +1,10 @@
 package main
 
 import (
-	"time"
+	"encoding/json"
 
 	log "github.com/rastasheep/utisak-worker/log"
 
-	"github.com/SlyMarbo/rss"
 	"github.com/jrallison/go-workers"
 	"gopkg.in/robfig/cron.v2"
 )
@@ -14,9 +13,6 @@ var (
 	config       *Config
 	logger       log.Logger
 	feedRegistry *FeedRegistry
-	Urls         = []string{
-		"http://www.politika.rs/rubrike/Sport/index.1.lt.xml",
-	}
 )
 
 func main() {
@@ -26,13 +22,7 @@ func main() {
 	config = LoadConfig()
 	feedRegistry = NewFeedRegistry(config.FeedRegistryPath)
 
-	workers.Configure(map[string]string{
-		"server":   config.Redis.Domain,
-		"database": config.Redis.Database,
-		"pool":     config.Redis.Pool,
-		"process":  config.Redis.Process,
-	})
-
+	workers.Configure(config.RedisConfig())
 	workers.Middleware.Append(&workers.MiddlewareRetry{})
 
 	workers.Process("article_fetching", articleFetchingJob, 10)
@@ -46,50 +36,30 @@ func main() {
 
 func startCron() {
 	c := cron.New()
-	c.AddFunc("*/5 * * * * *", pullFeeds)
+	c.AddFunc("*/5 * * * * *", fetchFeeds)
 	c.Start()
 }
 
-func pullFeeds() {
+func fetchFeeds() {
 	logger.Info("Starting to pull feeds")
 
-	for _, url := range Urls {
-		fetchFeed(url)
-	}
+	feedRegistry.FetchFeeds(enqueueArticleFetchingJob)
 
 	log.Info("Finished pulling feeds")
 }
 
-func fetchFeed(url string) {
-	logger.Info("Stearted fetching field: %s", url)
-
-	rss.CacheParsedItemIDs(false)
-	feed, _ := rss.Fetch(url)
-
-	logger.Info("Finished fetching field: %s", url)
-	logger.Info("There are %d items in %s", len(feed.Items), url)
-
-	fetchNewItems(feed.Items)
-}
-
-func fetchNewItems(items []*rss.Item) {
-	start, _ := time.Parse(time.RFC822, "24 Jul 15 18:00 UTC")
-
-	for _, item := range items {
-		if item.Date.UTC().After(start) {
-			logger.Info("Enquing new item")
-			logger.Info("article_fetching", "Add", item)
-		}
-	}
+func enqueueArticleFetchingJob(item *FeedItem) {
+	workers.Enqueue("article_fetching", "Add", item)
 }
 
 func articleFetchingJob(message *workers.Msg) {
-	params, _ := message.Args().Map()
-	article := Article{}
+	var item FeedItem
 
-	if err := article.ParseData(params); err != nil {
-		panic(err)
-	}
+	params := message.Args().ToJson()
+	json.Unmarshal([]byte(params), &item)
+
+	article := item.NewArticle()
+	article.FetchDetails()
 
 	logger.Info("Successfully created article: %+v\n", article)
 }

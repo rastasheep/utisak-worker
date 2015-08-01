@@ -35,3 +35,12 @@ func LoadConfig() *Config {
 	}
 	return &config
 }
+
+func (config *Config) RedisConfig() map[string]string {
+	return map[string]string{
+		"server":   config.Redis.Domain,
+		"database": config.Redis.Database,
+		"pool":     config.Redis.Pool,
+		"process":  config.Redis.Process,
+	}
+}

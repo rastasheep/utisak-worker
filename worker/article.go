@@ -15,17 +15,12 @@ type Article struct {
 	Excerpt   string
 	WordCount int `json:"word_count"`
 	//Content    string
-	Date      time.Time
-	LeadImage string `json:"lead_image_url"`
+	Date      time.Time `sql:"index:idx_category_source"`
+	LeadImage string    `json:"lead_image_url"`
+	Catogory  string    `sql:"index:idx_category_source"`
+	Source    string    `sql:"index:idx_category_source"`
 }
 
 func (article *Article) FetchDetails() error {
 	return ReadabilityParse(article.Url, article)
-}
-
-func LatestArticle() *Article {
-	var article Article
-
-	db.Order("date desc").Limit(1).Find(&article)
-	return &article
 }

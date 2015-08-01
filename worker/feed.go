@@ -7,8 +7,10 @@ import (
 )
 
 type Feed struct {
-	url     string
-	rawData *rss.Feed
+	url      string
+	catogory string
+	source   string
+	rawData  *rss.Feed
 }
 
 func (feed *Feed) Fetch() {
@@ -23,7 +25,7 @@ func (feed *Feed) Fetch() {
 
 func (feed *Feed) ProcessNewItems(latest time.Time, action func(*FeedItem)) {
 	for _, item := range feed.rawData.Items {
-		feedItem := &FeedItem{*item}
+		feedItem := &FeedItem{*item, feed.catogory, feed.source}
 
 		logger.Info("Checking item time: %v latest: %v", feedItem.Date.UTC(), latest.UTC())
 		if feedItem.Date.UTC().After(latest.UTC()) {
@@ -33,16 +35,31 @@ func (feed *Feed) ProcessNewItems(latest time.Time, action func(*FeedItem)) {
 	}
 }
 
+func (feed *Feed) LatestArticle() *Article {
+	var article Article
+
+	db.Where("catogory = ? and source = ?", feed.catogory, feed.source).
+		Order("date desc").
+		Limit(1).
+		Find(&article)
+
+	return &article
+}
+
 type FeedItem struct {
 	rss.Item
+	Catogory string
+	Source   string
 }
 
 func (feed *FeedItem) NewArticle() *Article {
 	return &Article{
 		//ID:      feed.ID,
-		Title:   feed.Title,
-		Url:     feed.Link,
-		Excerpt: feed.Summary,
-		Date:    feed.Date,
+		Title:    feed.Title,
+		Url:      feed.Link,
+		Excerpt:  feed.Summary,
+		Date:     feed.Date,
+		Catogory: feed.Catogory,
+		Source:   feed.Source,
 	}
 }

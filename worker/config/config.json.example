@@ -1,6 +1,9 @@
 {
-  "readability_token":"123",
-   "redis": {
+  "logTo": "stdout",
+  "logLevel": "DEBUG",
+  "feedRegistryPath": "config/feeds.json",
+  "readabilityToken": "3e7f364243ee793537a556b6dee3eed86a045e71",
+  "redis": {
      "domain": "localhost:6379",
      "database": "0",
      "pool": "30",

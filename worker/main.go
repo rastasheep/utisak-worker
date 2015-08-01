@@ -16,10 +16,11 @@ var (
 )
 
 func main() {
-	log.LogTo("stdout", "DEBUG")
+	config = LoadConfig()
+
+	log.LogTo(config.LogTo, config.LogLevel)
 	logger = log.NewPrefixLogger("MAIN")
 
-	config = LoadConfig()
 	feedRegistry = NewFeedRegistry(config.FeedRegistryPath)
 
 	workers.Configure(config.RedisConfig())

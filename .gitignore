@@ -25,3 +25,4 @@ _testmain.go
 
 # App specific
 worker/config/config.json
+bin/

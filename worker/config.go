@@ -7,9 +7,13 @@ import (
 	"io/ioutil"
 )
 
+var configPath = flag.String("config", "config/config.json", "Path to configuration file")
+
 type Config struct {
-	ReadabilityToken string `json:"readability_token"`
-	FeedRegistryPath string `json:"feed_registry_path"`
+	LogTo            string
+	LogLevel         string
+	ReadabilityToken string
+	FeedRegistryPath string
 	RedisDomain      string
 	Redis            struct {
 		Domain   string // location of redis instance
@@ -19,11 +23,10 @@ type Config struct {
 	}
 }
 
-var configPath = flag.String("config", "worker/config/config.json", "Path to file containing application ids and credentials for other services.")
-
 func LoadConfig() *Config {
-	config := Config{}
+	flag.Parse()
 
+	config := Config{}
 	raw, err := ioutil.ReadFile(*configPath)
 	if err != nil {
 		panic(fmt.Sprintf("Could not read config file: %v", err))

@@ -7,25 +7,25 @@ import (
 )
 
 type Feed struct {
-	url      string
-	catogory string
-	source   string
-	rawData  *rss.Feed
+	Url      string
+	Catogory string
+	Source   string
+	RawData  *rss.Feed
 }
 
 func (feed *Feed) Fetch() {
-	logger.Info("Stearted fetching field: %s", feed.url)
+	logger.Info("Stearted fetching field: %s", feed.Url)
 
 	rss.CacheParsedItemIDs(false)
-	feed.rawData, _ = rss.Fetch(feed.url)
+	feed.RawData, _ = rss.Fetch(feed.Url)
 
-	logger.Info("Finished fetching field: %s", feed.url)
-	logger.Info("There are %d items in %s", len(feed.rawData.Items), feed.url)
+	logger.Info("Finished fetching field: %s", feed.Url)
+	logger.Info("There are %d items in %s", len(feed.RawData.Items), feed.Url)
 }
 
 func (feed *Feed) ProcessNewItems(latest time.Time, action func(*FeedItem)) {
-	for _, item := range feed.rawData.Items {
-		feedItem := &FeedItem{*item, feed.catogory, feed.source}
+	for _, item := range feed.RawData.Items {
+		feedItem := &FeedItem{*item, feed.Catogory, feed.Source}
 
 		logger.Info("Checking item time: %v latest: %v", feedItem.Date.UTC(), latest.UTC())
 		if feedItem.Date.UTC().After(latest.UTC()) {
@@ -38,7 +38,7 @@ func (feed *Feed) ProcessNewItems(latest time.Time, action func(*FeedItem)) {
 func (feed *Feed) LatestArticle() *Article {
 	var article Article
 
-	db.Where("catogory = ? and source = ?", feed.catogory, feed.source).
+	db.Where("catogory = ? and source = ?", feed.Catogory, feed.Source).
 		Order("date desc").
 		Limit(1).
 		Find(&article)

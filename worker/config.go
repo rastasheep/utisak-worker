@@ -32,18 +32,21 @@ type Config struct {
 
 func LoadConfig() *Config {
 	flag.Parse()
+	var config Config
 
-	config := Config{}
-	raw, err := ioutil.ReadFile(*configPath)
+	LoadFile(*configPath, &config)
+	return &config
+}
+
+func LoadFile(path string, dest interface{}) {
+	raw, err := ioutil.ReadFile(path)
 	if err != nil {
 		panic(fmt.Sprintf("Could not read config file: %v", err))
 	}
 
-	if err = json.Unmarshal(raw, &config); err != nil {
+	if err = json.Unmarshal(raw, &dest); err != nil {
 		panic(fmt.Sprintf("Could not unmarshal config file: %v", err))
-
 	}
-	return &config
 }
 
 func (config *Config) RedisConfig() map[string]string {

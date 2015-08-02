@@ -26,6 +26,7 @@ func main() {
 	logger = log.NewPrefixLogger("MAIN")
 
 	feedRegistry = NewFeedRegistry(config.FeedRegistryPath)
+	logger.Info("Registry: %+v", feedRegistry)
 
 	db = newDb()
 	defer db.Close()

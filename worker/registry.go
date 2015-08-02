@@ -1,4 +1,4 @@
-package main
+package worker
 
 import (
 	log "github.com/rastasheep/utisak-worker/log"

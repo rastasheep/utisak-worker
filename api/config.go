@@ -1,4 +1,4 @@
-package worker
+package api
 
 import (
 	"encoding/json"
@@ -10,16 +10,8 @@ import (
 var configPath = flag.String("config", "config/config.json", "Path to configuration file")
 
 type Config struct {
-	LogTo            string
-	LogLevel         string
-	ReadabilityToken string
-	FeedRegistryPath string
-	Redis            struct {
-		Domain   string
-		Database string
-		Pool     string
-		Process  string
-	}
+	LogTo    string
+	LogLevel string
 	Postgres struct {
 		Host     string
 		Port     string
@@ -45,15 +37,6 @@ func LoadFile(path string, dest interface{}) {
 
 	if err = json.Unmarshal(raw, &dest); err != nil {
 		panic(fmt.Sprintf("Could not unmarshal config file: %v", err))
-	}
-}
-
-func (config *Config) RedisConfig() map[string]string {
-	return map[string]string{
-		"server":   config.Redis.Domain,
-		"database": config.Redis.Database,
-		"pool":     config.Redis.Pool,
-		"process":  config.Redis.Process,
 	}
 }
 

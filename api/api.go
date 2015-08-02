@@ -1,13 +1,15 @@
-package main
+package api
 
 import (
 	"fmt"
 	"net/http"
 
+	"github.com/jinzhu/gorm"
 	log "github.com/rastasheep/utisak-worker/log"
 )
 
 var (
+	config *Config
 	logger log.Logger
 )
 
@@ -36,8 +38,10 @@ func unknownHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "http://utisak.com", http.StatusFound)
 }
 
-func main() {
-	log.LogTo("stdout", "DEBUG")
+func Main() {
+	config = LoadConfig()
+
+	log.LogTo(config.LogTo, config.LogLevel)
 	logger = log.NewPrefixLogger("MAIN")
 
 	http.HandleFunc("/posts", potsHandler)
@@ -47,4 +51,18 @@ func main() {
 
 	logger.Info("Listening on port %s\n", port)
 	http.ListenAndServe(":"+port, nil)
+}
+
+func newDb() *gorm.DB {
+	logger.Info("Connecting to postgres: %s", config.PostgresConfig())
+	db, _ := gorm.Open("postgres", config.PostgresConfig())
+
+	err := db.DB().Ping()
+	if err != nil {
+		panic(fmt.Sprintf("Unable to connect to postgres: %s", err))
+	}
+
+	db.LogMode(true)
+	//db.AutoMigrate(&Article{})
+	return &db
 }

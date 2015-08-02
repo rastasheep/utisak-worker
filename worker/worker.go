@@ -1,4 +1,4 @@
-package main
+package worker
 
 import (
 	"encoding/json"
@@ -19,7 +19,7 @@ var (
 	feedRegistry *FeedRegistry
 )
 
-func main() {
+func Main() {
 	config = LoadConfig()
 
 	log.LogTo(config.LogTo, config.LogLevel)

@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/SlyMarbo/rss"
+	. "github.com/rastasheep/utisak-worker/article"
 )
 
 type Feed struct {

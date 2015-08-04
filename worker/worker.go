@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
+	. "github.com/rastasheep/utisak-worker/article"
 	log "github.com/rastasheep/utisak-worker/log"
 
 	"github.com/jinzhu/gorm"
@@ -68,7 +69,8 @@ func articleFetchingJob(message *workers.Msg) {
 	json.Unmarshal([]byte(params), &item)
 
 	article := item.NewArticle()
-	article.FetchDetails()
+	ReadabilityParse(article.Url, &article)
+
 	db.Create(&article)
 
 	logger.Info("Successfully created article: %+v\n", article)

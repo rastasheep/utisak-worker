@@ -1,4 +1,4 @@
-package worker
+package article
 
 import "time"
 
@@ -19,8 +19,4 @@ type Article struct {
 	LeadImage string    `json:"lead_image_url"`
 	Catogory  string    `sql:"index:idx_category_source"`
 	Source    string    `sql:"index:idx_category_source"`
-}
-
-func (article *Article) FetchDetails() error {
-	return ReadabilityParse(article.Url, article)
 }

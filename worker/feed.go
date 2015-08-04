@@ -8,10 +8,11 @@ import (
 )
 
 type Feed struct {
-	Url      string
-	Catogory string
-	Source   string
-	RawData  *rss.Feed
+	Url          string
+	Category     string
+	CategorySlug string `json:"category_slug"`
+	Source       string
+	RawData      *rss.Feed
 }
 
 func (feed *Feed) Fetch() {
@@ -26,7 +27,7 @@ func (feed *Feed) Fetch() {
 
 func (feed *Feed) ProcessNewItems(latest time.Time, action func(*FeedItem)) {
 	for _, item := range feed.RawData.Items {
-		feedItem := &FeedItem{*item, feed.Catogory, feed.Source}
+		feedItem := &FeedItem{*item, feed.Category, feed.CategorySlug, feed.Source}
 
 		logger.Info("Checking item time: %v latest: %v", feedItem.Date.UTC(), latest.UTC())
 		if feedItem.Date.UTC().After(latest.UTC()) {
@@ -39,7 +40,7 @@ func (feed *Feed) ProcessNewItems(latest time.Time, action func(*FeedItem)) {
 func (feed *Feed) LatestArticle() *Article {
 	var article Article
 
-	db.Where("catogory = ? and source = ?", feed.Catogory, feed.Source).
+	db.Where("category_slug = ? and source = ?", feed.CategorySlug, feed.Source).
 		Order("date desc").
 		Limit(1).
 		Find(&article)
@@ -49,18 +50,20 @@ func (feed *Feed) LatestArticle() *Article {
 
 type FeedItem struct {
 	rss.Item
-	Catogory string
-	Source   string
+	Category     string
+	CategorySlug string
+	Source       string
 }
 
 func (feed *FeedItem) NewArticle() *Article {
 	return &Article{
 		//ID:      feed.ID,
-		Title:    feed.Title,
-		Url:      feed.Link,
-		Excerpt:  feed.Summary,
-		Date:     feed.Date,
-		Catogory: feed.Catogory,
-		Source:   feed.Source,
+		Title:        feed.Title,
+		Url:          feed.Link,
+		Excerpt:      feed.Summary,
+		Date:         feed.Date,
+		Category:     feed.Category,
+		CategorySlug: feed.CategorySlug,
+		Source:       feed.Source,
 	}
 }

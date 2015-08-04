@@ -1,21 +1,26 @@
 package api
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
 	"github.com/jinzhu/gorm"
+	_ "github.com/lib/pq"
+	. "github.com/rastasheep/utisak-worker/article"
 	log "github.com/rastasheep/utisak-worker/log"
 )
 
 var (
 	config *Config
 	logger log.Logger
+	db     *gorm.DB
 )
 
 func potsHandler(w http.ResponseWriter, r *http.Request) {
 	logger.Info("%s %s %s", r.RemoteAddr, r.Method, r.URL)
 
+	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
 
@@ -29,8 +34,15 @@ func potsHandler(w http.ResponseWriter, r *http.Request) {
 		category = "all"
 	}
 
-	fmt.Fprintf(w, "Hi there, I bring you  %s!", category)
+	categories := GetCategories()
 
+	var articles []Article
+	db.Find(&articles)
+
+	if resp, err := json.Marshal(&Response{Categories: categories, Articles: articles}); err == nil {
+		w.WriteHeader(http.StatusOK)
+		w.Write(resp)
+	}
 }
 
 func unknownHandler(w http.ResponseWriter, r *http.Request) {
@@ -43,6 +55,9 @@ func Main() {
 
 	log.LogTo(config.LogTo, config.LogLevel)
 	logger = log.NewPrefixLogger("MAIN")
+
+	db = newDb()
+	defer db.Close()
 
 	http.HandleFunc("/posts", potsHandler)
 	http.HandleFunc("/", unknownHandler)
@@ -63,6 +78,6 @@ func newDb() *gorm.DB {
 	}
 
 	db.LogMode(true)
-	//db.AutoMigrate(&Article{})
+	db.AutoMigrate(&Article{})
 	return &db
 }

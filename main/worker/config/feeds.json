@@ -1,12 +1,14 @@
 [
   {
     "url": "http://www.politika.rs/rubrike/Sport/index.1.lt.xml",
-    "catogory": "Sport",
+    "category": "Sport",
+    "category_slug": "sport",
     "source": "Politika"
   },
   {
     "url": "http://www.politika.rs/rubrike/Kultura/index.1.lt.xml",
-    "catogory": "Kultura",
+    "category": "Kultura",
+    "category_slug": "kultura",
     "source": "Politika"
   }
 ]

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/jinzhu/gorm"
 	_ "github.com/lib/pq"
@@ -59,7 +60,7 @@ func Main() {
 	db = newDb()
 	defer db.Close()
 
-	http.HandleFunc("/posts", potsHandler)
+	http.HandleFunc("/posts", serve(potsHandler))
 	http.HandleFunc("/", unknownHandler)
 
 	port := "8080" //os.Getenv("PORT")
@@ -80,4 +81,16 @@ func newDb() *gorm.DB {
 	db.LogMode(true)
 	db.AutoMigrate(&Article{})
 	return &db
+}
+
+func serve(fn func(http.ResponseWriter, *http.Request)) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+
+		fn(w, r) // call the handler
+
+		elapsed := time.Now().Sub(start)
+
+		logger.Info("%v %s %s", elapsed, r.Method, r.RequestURI)
+	}
 }

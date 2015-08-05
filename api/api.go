@@ -37,7 +37,7 @@ func potsHandler(w http.ResponseWriter, r *http.Request) {
 
 	categories := GetCategories()
 
-	var articles []Article
+	var articles []SerializedArticle
 	db.Find(&articles)
 
 	if resp, err := json.Marshal(&Response{Categories: categories, Articles: articles}); err == nil {

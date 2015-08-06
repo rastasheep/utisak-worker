@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/jinzhu/gorm"
@@ -30,15 +31,18 @@ func potsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	category := r.FormValue("category")
-	if len(category) == 0 {
-		category = "all"
+	var articles []SerializedArticle
+
+	category := strings.Split(r.FormValue("category"), ",")
+	category = deleteEmpty(category)
+
+	if len(category) == 0 || category[0] == "all" {
+		db.Find(&articles)
+	} else {
+		db.Where("category_slug IN (?)", category).Find(&articles)
 	}
 
 	categories := GetCategories()
-
-	var articles []SerializedArticle
-	db.Find(&articles)
 
 	if resp, err := json.Marshal(&Response{Categories: categories, Articles: articles}); err == nil {
 		w.WriteHeader(http.StatusOK)
@@ -93,4 +97,17 @@ func serve(fn func(http.ResponseWriter, *http.Request)) http.HandlerFunc {
 
 		logger.Info("%v %s %s", elapsed, r.Method, r.RequestURI)
 	}
+}
+
+func deleteEmpty(s []string) []string {
+	var r []string
+	if len(s) == 0 {
+		return s
+	}
+	for _, str := range s {
+		if str != "" {
+			r = append(r, str)
+		}
+	}
+	return r
 }

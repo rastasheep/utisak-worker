@@ -19,7 +19,7 @@ func GetCategories() []Category {
 	var categories []Category
 
 	db.Select("category, category_slug, COUNT(category)").
-		Where("DATE(created_at) = DATE(NOW())").
+		//Where("DATE(created_at) = DATE(NOW())").
 		Group("category, category_slug").
 		Find(&categories)
 

@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"reflect"
+	"strconv"
 	"strings"
 	"time"
 
@@ -13,6 +15,11 @@ import (
 	log "github.com/rastasheep/utisak-worker/log"
 )
 
+const (
+	perPage = 20
+	allCat  = "all"
+)
+
 var (
 	config *Config
 	logger log.Logger
@@ -20,8 +27,6 @@ var (
 )
 
 func potsHandler(w http.ResponseWriter, r *http.Request) {
-	logger.Info("%s %s %s", r.RemoteAddr, r.Method, r.URL)
-
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
@@ -31,16 +36,26 @@ func potsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var articles []SerializedArticle
-
 	category := strings.Split(r.FormValue("category"), ",")
 	category = deleteEmpty(category)
 
-	if len(category) == 0 || category[0] == "all" {
-		db.Find(&articles)
-	} else {
-		db.Where("category_slug IN (?)", category).Find(&articles)
+	page, err := strconv.ParseInt(r.FormValue("page"), 10, 64)
+	if err != nil {
+		page = 0
 	}
+
+	var articles []SerializedArticle
+	searchRelation := db
+
+	if len(category) != 0 && !Contains(category, allCat) {
+		searchRelation = searchRelation.Where("category_slug IN (?)", category)
+	}
+
+	if page > 1 {
+		searchRelation = searchRelation.Offset((page - 1) * perPage)
+	}
+
+	searchRelation.Order("date desc").Limit(perPage).Find(&articles)
 
 	categories := GetCategories()
 
@@ -110,4 +125,15 @@ func deleteEmpty(s []string) []string {
 		}
 	}
 	return r
+}
+
+func Contains(slice interface{}, val interface{}) bool {
+	sv := reflect.ValueOf(slice)
+
+	for i := 0; i < sv.Len(); i++ {
+		if sv.Index(i).Interface() == val {
+			return true
+		}
+	}
+	return false
 }

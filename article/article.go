@@ -20,4 +20,5 @@ type Article struct {
 	Category     string
 	CategorySlug string `sql:"index:idx_category_source"`
 	Source       string `sql:"index:idx_category_source"`
+	TotalViews   int    `sql:"default:0"`
 }

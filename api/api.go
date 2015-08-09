@@ -9,6 +9,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gorilla/mux"
 	"github.com/jinzhu/gorm"
 	_ "github.com/lib/pq"
 	. "github.com/rastasheep/utisak-worker/article"
@@ -26,15 +27,22 @@ var (
 	db     *gorm.DB
 )
 
-func potsHandler(w http.ResponseWriter, r *http.Request) {
+func articleHandler(w http.ResponseWriter, r *http.Request) {
+	articleID := mux.Vars(r)["article_id"]
+	logger.Info("[article] %s ", articleID)
+
+	var article SerializedArticle
+
+	db.Select("url").Limit(1).Find(&article, articleID)
+
+	go db.Model(&article).Where("id = ?", articleID).UpdateColumn("total_views", gorm.Expr("total_views + ?", 1))
+
+	http.Redirect(w, r, article.Url, 301)
+}
+func articlesHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
-
-	if r.Method != "GET" {
-		http.Error(w, fmt.Sprintf("Unsupported method '%s'\n", r.Method), 501)
-		return
-	}
 
 	category := strings.Split(r.FormValue("category"), ",")
 	category = deleteEmpty(category)
@@ -79,13 +87,15 @@ func Main() {
 	db = newDb()
 	defer db.Close()
 
-	http.HandleFunc("/posts", serve(potsHandler))
-	http.HandleFunc("/", unknownHandler)
+	r := mux.NewRouter()
+	r.HandleFunc("/posts/{article_id}", serve(articleHandler)).Methods("GET")
+	r.HandleFunc("/posts", serve(articlesHandler)).Methods("GET")
+	r.NotFoundHandler = http.HandlerFunc(unknownHandler)
 
 	port := "8080" //os.Getenv("PORT")
 
 	logger.Info("Listening on port %s\n", port)
-	http.ListenAndServe(":"+port, nil)
+	http.ListenAndServe(":"+port, r)
 }
 
 func newDb() *gorm.DB {

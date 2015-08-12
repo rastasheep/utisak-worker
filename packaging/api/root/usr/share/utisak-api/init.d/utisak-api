@@ -1,0 +1,75 @@
+#! /bin/sh
+
+### BEGIN INIT INFO
+# Provides:          utisak-api
+# Required-Start:    $local_fs $remote_fs $network $syslog
+# Required-Stop:     $local_fs $remote_fs $network $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: utisak-api
+### END INIT INFO
+
+DAEMON_OPTS="--config=/etc/utisak-api/config.json"
+
+pid() {
+  if [ -f /usr/local/bin/utisak-api ]; then
+    pidof /usr/local/bin/utisak-api
+  fi
+}
+
+stop() {
+  if pidof /usr/local/bin/utisak-api >/dev/null; then
+    kill -9 "$(pid)"
+  else
+    echo "utisak-api not runned"
+    exit 1
+  fi
+}
+
+start() {
+  if pidof /usr/local/bin/utisak-api >/dev/null; then
+    echo "utisak-api already runned"
+    exit 1
+  else
+    nohup utisak-api $DAEMON_OPTS > /var/log/utisak-api.log  2>&1 &
+  fi
+}
+
+restart() {
+  if pidof /usr/local/bin/utisak-api >/dev/null; then
+    kill -9 "$(pid)"
+    nohup utisak-api $DAEMON_OPTS > /var/log/utisak-api.log  2>&1 &
+    exit 0
+  else
+    nohup utisak-api $DAEMON_OPTS > /var/log/utisak-api.log  2>&1 &
+    exit 0
+  fi
+}
+
+status() {
+  if pidof /usr/local/bin/utisak-api >/dev/null; then
+    echo "utisak-api with pid $(pid) is running"
+  else
+    echo "utisak-api is not running"
+  fi
+  exit 0
+}
+
+case "$1" in
+  start)
+        start
+        ;;
+  stop)
+        stop
+        ;;
+  restart)
+        restart
+        ;;
+  status)
+        status
+        ;;
+  *)
+        echo "Usage: service utisak-api {start|stop|restart|status}"
+        exit 1
+        ;;
+esac

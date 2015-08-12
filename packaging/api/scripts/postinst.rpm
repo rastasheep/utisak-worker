@@ -1,0 +1,27 @@
+#!/bin/sh
+
+set -e
+
+if [ -f /etc/utisak-api/config.json ]; then
+  chmod 600 /etc/utisak-api/config.json
+fi
+
+if which systemctl > /dev/null; then
+  echo "Using systemd to control utisak-api"
+  cp /usr/share/utisak-api/systemd/utisak-api.service /lib/systemd/system/utisak-api.service
+
+  systemctl daemon-reload || :
+  if [ "$1" = 1 ] ; then
+    # first time install
+    systemctl enable utisak-api || :
+    systemctl start utisak-api || :
+  else
+    echo "Upgrading utisak-api"
+  fi
+else
+  echo "Couldn't find systemd to control utisak-api, cannot proceed."
+  echo "Open an issue and tell us about your system."
+  exit 1
+fi
+
+exit 0

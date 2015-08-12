@@ -14,6 +14,10 @@ import (
 )
 
 var (
+	// commit sha for the current build, set by the compile process.
+	version  string
+	revision string
+
 	config       *Config
 	logger       log.Logger
 	db           *gorm.DB

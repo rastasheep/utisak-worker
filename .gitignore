@@ -27,3 +27,4 @@ _testmain.go
 main/worker/config/config.json
 main/api/config/config.json
 bin/
+packaging/output/*

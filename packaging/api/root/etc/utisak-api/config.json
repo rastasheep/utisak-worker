@@ -1,0 +1,12 @@
+{
+  "logTo": "stdout",
+  "logLevel": "DEBUG",
+  "postgres": {
+    "host": "localhost",
+    "port": "5432",
+    "database": "utisak_development",
+    "username": "developer",
+    "password": "developer"
+  }
+
+}

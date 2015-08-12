@@ -1,0 +1,8 @@
+#!/bin/sh
+set -e
+
+if [ "$1" -eq 0 ] ; then
+  echo Stopping utisak-api
+  systemctl --no-reload disable utisak-api || :
+  systemctl stop utisak-api || :
+fi

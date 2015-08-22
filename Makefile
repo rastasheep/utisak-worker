@@ -59,7 +59,7 @@ define build_dep
 		--description "Discover news, easily" \
 		--maintainer "Aleksandar Diklic <rastasheep@gmail.com>" \
 		--license "MIT" \
-		packaging/api/root/=/
+		packaging/$1/root/=/
 	cp packaging/output/$2.deb packaging/output/$2.deb.$(SHA)
 endef
 
@@ -79,6 +79,6 @@ define build_rpm
 		--description "Discover news, easily" \
 		--maintainer "Aleksandar Diklic <rastasheep@gmail.com>" \
 		--license "MIT" \
-		packaging/api/root/=/
+		packaging/$1/root/=/
 	cp packaging/output/$2.rpm packaging/output/$2.rpm.$(SHA)
 endef

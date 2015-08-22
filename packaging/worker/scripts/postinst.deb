@@ -37,7 +37,7 @@ upstart() {
       fi
     fi
 
-    cp -r /usr/share/utisak-worker/init/utisak-worker /etc/init/utisak-worker
+    cp -r /usr/share/utisak-worker/init/utisak-worker.conf /etc/init/utisak-worker.conf
     initctl start utisak-worker || :
   else
     echo "Couldn't find upstart to control utisak-worker, cannot proceed."

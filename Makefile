@@ -29,16 +29,18 @@ run-worker:
 clean:
 	find . -name "*.out" -delete
 	rm -rf packaging/output
-	rm -f packaging/api/root/usr/local/bin/utisak-api
-	rm -r packaging/worker/root/usr/local/bin/utisak-worker
+	rm -f packaging/api/root/usr/local/bin/utisak-api || true
+	rm -r packaging/worker/root/usr/local/bin/utisak-worker || true
 
 packages: clean build deb rpm
 
 deb:
 	$(call build_dep,api,utisak-api)
+	$(call build_dep,worker,utisak-worker)
 
 rpm:
 	$(call build_rpm,api,utisak-api)
+	$(call build_rpm,worker,utisak-worker)
 
 define build_dep
 	fpm -s dir -t deb \
@@ -57,7 +59,6 @@ define build_dep
 		--description "Discover news, easily" \
 		--maintainer "Aleksandar Diklic <rastasheep@gmail.com>" \
 		--license "MIT" \
-		--config-files /etc/$2/config.json \
 		packaging/api/root/=/
 	cp packaging/output/$2.deb packaging/output/$2.deb.$(SHA)
 endef
@@ -78,7 +79,6 @@ define build_rpm
 		--description "Discover news, easily" \
 		--maintainer "Aleksandar Diklic <rastasheep@gmail.com>" \
 		--license "MIT" \
-		--config-files /etc/$2/config.json \
 		packaging/api/root/=/
 	cp packaging/output/$2.rpm packaging/output/$2.rpm.$(SHA)
 endef

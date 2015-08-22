@@ -28,3 +28,5 @@ main/worker/config/config.json
 main/api/config/config.json
 bin/
 packaging/output/*
+packaging/api/root/usr/local/bin/utisak-api
+packaging/worker/root/usr/local/bin/utisak-worker

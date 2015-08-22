@@ -1,0 +1,31 @@
+#!/bin/sh
+
+set -e
+
+if [ -f /etc/utisak-worker/config.json ]; then
+  chmod 600 /etc/utisak-worker/config.json
+fi
+
+if [ -f /etc/utisak-worker/feeds.json ]; then
+  chmod 600 /etc/utisak-worker/feeds.json
+fi
+
+if which systemctl > /dev/null; then
+  echo "Using systemd to control utisak-worker"
+  cp /usr/share/utisak-worker/systemd/utisak-worker.service /lib/systemd/system/utisak-worker.service
+
+  systemctl daemon-reload || :
+  if [ "$1" = 1 ] ; then
+    # first time install
+    systemctl enable utisak-worker || :
+    systemctl start utisak-worker || :
+  else
+    echo "Upgrading utisak-worker"
+  fi
+else
+  echo "Couldn't find systemd to control utisak-worker, cannot proceed."
+  echo "Open an issue and tell us about your system."
+  exit 1
+fi
+
+exit 0

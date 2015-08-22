@@ -1,0 +1,20 @@
+{
+  "logTo": "stdout",
+  "logLevel": "DEBUG",
+  "feedRegistryPath": "/etc/utisak-worker/feeds.json",
+  "readabilityToken": "123",
+  "redis": {
+    "domain": "localhost:6379",
+    "database": "0",
+    "pool": "30",
+    "process": "1"
+   },
+  "postgres": {
+    "host": "localhost",
+    "port": "5432",
+    "database": "utisak_development",
+    "username": "developer",
+    "password": "developer"
+  }
+
+}

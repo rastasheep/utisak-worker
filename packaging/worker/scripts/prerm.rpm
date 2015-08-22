@@ -1,0 +1,8 @@
+#!/bin/sh
+set -e
+
+if [ "$1" -eq 0 ] ; then
+  echo topping utisak-worker
+  systemctl --no-reload disable utisak-worker || :
+  systemctl stop utisak-worker || :
+fi

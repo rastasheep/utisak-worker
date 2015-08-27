@@ -27,6 +27,12 @@ type Config struct {
 		Username string
 		Password string
 	}
+	Swiftype struct {
+		Enabled      bool
+		AuthToken    string
+		Engine       string
+		DocumentType string
+	}
 }
 
 func LoadConfig() *Config {

@@ -15,6 +15,11 @@
     "database": "utisak_development",
     "username": "developer",
     "password": "developer"
+  },
+  "swiftype":{
+    "enabled": false,
+    "authToken": "123",
+    "engine": "utisak",
+    "documentType": "posts"
   }
-
 }

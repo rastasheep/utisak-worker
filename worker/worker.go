@@ -39,7 +39,8 @@ func Main() {
 	workers.Configure(config.RedisConfig())
 	workers.Middleware.Append(&workers.MiddlewareRetry{})
 
-	workers.Process("article_fetching", articleFetchingJob, 10)
+	workers.Process("article_fetching", articleFetchingJob, 5)
+	workers.Process("search_indexing", searchIndexingJob, 5)
 
 	go workers.StatsServer(8080)
 
@@ -77,7 +78,30 @@ func articleFetchingJob(message *workers.Msg) {
 
 	db.Create(&article)
 
+	if config.Swiftype.Enabled {
+		logger.Info("[st] Enquing search indexing job")
+		enqueueSearchIndexingJob(article.ID)
+	}
+
 	logger.Info("Successfully created article: %+v\n", article)
+}
+
+func enqueueSearchIndexingJob(id uint) {
+	workers.Enqueue("search_indexing", "Add", id)
+}
+
+func searchIndexingJob(message *workers.Msg) {
+	var article SerializedArticle
+	id, _ := message.Args().Uint64()
+	logger.Info("[st] Indexing job received id: %d", id)
+
+	if db.First(&article, id).RecordNotFound() {
+		panic(fmt.Sprintf("Unable to find article for indexing: %s", id))
+	}
+
+	if err := SwiftypeIndex(&article); err != nil {
+		panic(fmt.Sprintf("Unable to post swiftype document: %s", err))
+	}
 }
 
 func newDb() *gorm.DB {

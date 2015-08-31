@@ -56,6 +56,8 @@ func articlesHandler(w http.ResponseWriter, r *http.Request) {
 		page = 0
 	}
 
+	sort := r.FormValue("sort")
+
 	var articles []SerializedArticle
 	searchRelation := db
 
@@ -67,7 +69,13 @@ func articlesHandler(w http.ResponseWriter, r *http.Request) {
 		searchRelation = searchRelation.Offset((page - 1) * perPage)
 	}
 
-	searchRelation.Order("date desc").Limit(perPage).Find(&articles)
+	if sort == "newest" {
+		searchRelation = searchRelation.Order("date desc")
+	} else {
+		searchRelation = searchRelation.Order("(total_views / POW(((EXTRACT(EPOCH FROM (now()-date)) / 3600)::integer + 2), 1.5)) desc")
+	}
+
+	searchRelation.Limit(perPage).Find(&articles)
 
 	categories := GetCategories()
 

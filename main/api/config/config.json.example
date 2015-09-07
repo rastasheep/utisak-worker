@@ -1,7 +1,7 @@
 {
   "logTo": "stdout",
   "logLevel": "DEBUG",
-  "baseUrl": "http://localhost:8080",
+  "baseUrl": "http://local.go:8080",
   "postgres": {
     "host": "localhost",
     "port": "5432",

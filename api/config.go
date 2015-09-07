@@ -12,6 +12,7 @@ var configPath = flag.String("config", "config/config.json", "Path to configurat
 type Config struct {
 	LogTo    string
 	LogLevel string
+	BaseUrl  string
 	Postgres struct {
 		Host     string
 		Port     string

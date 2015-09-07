@@ -5,7 +5,9 @@ import (
 	"time"
 )
 
-const ShareUrlTmpl = "http://local.go:8080/posts/%d"
+const ShareUrlTmpl = "%s/posts/%d"
+
+var BaseUrl = "http://localhost:8080"
 
 type SerializedArticle struct {
 	ID        uint      `json:"-"`
@@ -32,6 +34,6 @@ func (sa SerializedArticle) TableName() string {
 }
 
 func (sa *SerializedArticle) AfterFind() (err error) {
-	sa.ShareUrl = fmt.Sprintf(ShareUrlTmpl, sa.ID)
+	sa.ShareUrl = fmt.Sprintf(ShareUrlTmpl, BaseUrl, sa.ID)
 	return
 }

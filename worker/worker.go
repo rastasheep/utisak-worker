@@ -3,6 +3,7 @@ package worker
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
 	. "github.com/rastasheep/utisak-worker/article"
 	log "github.com/rastasheep/utisak-worker/log"
@@ -52,7 +53,7 @@ func Main() {
 
 func startCron() {
 	c := cron.New()
-	c.AddFunc("*/5 * * * * *", fetchFeeds)
+	c.AddFunc("0 */5 * * * *", fetchFeeds)
 	c.Start()
 }
 
@@ -70,6 +71,8 @@ func enqueueArticleFetchingJob(item *FeedItem) {
 
 func articleFetchingJob(message *workers.Msg) {
 	var item FeedItem
+
+	time.Sleep(5 * time.Second)
 
 	params := message.Args().ToJson()
 	json.Unmarshal([]byte(params), &item)

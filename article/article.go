@@ -8,7 +8,7 @@ type Article struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 
-	Title     string
+	Title     string `json:"-"`
 	Domain    string
 	Url       string
 	Author    string

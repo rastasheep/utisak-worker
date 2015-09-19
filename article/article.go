@@ -1,6 +1,9 @@
 package article
 
-import "time"
+import (
+	"net/url"
+	"time"
+)
 
 type Article struct {
 	// gorm.Model
@@ -21,4 +24,10 @@ type Article struct {
 	CategorySlug string `sql:"index:idx_category_source"`
 	Source       string `sql:"index:idx_category_source"`
 	TotalViews   int    `sql:"default:0"`
+}
+
+func (a *Article) BeforeCreate() (err error) {
+	u, _ := url.Parse(a.LeadImage)
+	a.LeadImage = u.String()
+	return
 }

@@ -15,14 +15,19 @@ type Feed struct {
 	RawData      *rss.Feed
 }
 
-func (feed *Feed) Fetch() {
+func (feed *Feed) Fetch() error {
+	var err error
 	logger.Info("Stearted fetching field: %s", feed.Url)
 
 	rss.CacheParsedItemIDs(false)
-	feed.RawData, _ = rss.Fetch(feed.Url)
+	feed.RawData, err = rss.Fetch(feed.Url)
+	if err != nil {
+		return err
+	}
 
 	logger.Info("Finished fetching field: %s", feed.Url)
 	logger.Info("There are %d items in %s", len(feed.RawData.Items), feed.Url)
+	return nil
 }
 
 func (feed *Feed) ProcessNewItems(latest time.Time, action func(*FeedItem)) {

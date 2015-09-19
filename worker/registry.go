@@ -20,7 +20,11 @@ func NewFeedRegistry(sourcePath string) *FeedRegistry {
 
 func (registry *FeedRegistry) FetchFeeds(action func(*FeedItem)) {
 	for _, feed := range registry.Feeds {
-		feed.Fetch()
+		err := feed.Fetch()
+		if err != nil {
+			registry.Logger.Error("Failed to fetch feed: %s reason: %s", feed.Url, err.Error())
+			return
+		}
 
 		article := feed.LatestArticle()
 

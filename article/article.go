@@ -27,7 +27,10 @@ type Article struct {
 }
 
 func (a *Article) BeforeCreate() (err error) {
-	u, _ := url.Parse(a.LeadImage)
+	u, err := url.Parse(a.LeadImage)
+	if err != nil {
+		a.LeadImage = ""
+	}
 	a.LeadImage = u.String()
 	return
 }

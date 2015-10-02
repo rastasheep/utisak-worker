@@ -7,7 +7,7 @@ import (
 
 const ShareUrlTmpl = "%s/posts/%d"
 
-var BaseUrl = "http://localhost:8080"
+var BaseUrl string
 
 type SerializedArticle struct {
 	ID        uint      `json:"-"`

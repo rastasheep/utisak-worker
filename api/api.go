@@ -92,6 +92,7 @@ func unknownHandler(w http.ResponseWriter, r *http.Request) {
 
 func Main() {
 	config = LoadConfig()
+	BaseUrl = config.BaseUrl
 
 	log.LogTo(config.LogTo, config.LogLevel)
 	logger = log.NewPrefixLogger("MAIN")

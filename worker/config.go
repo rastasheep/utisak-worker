@@ -13,6 +13,7 @@ type Config struct {
 	LogTo            string
 	LogLevel         string
 	BaseUrl          string
+	ArticlePrefix    string
 	ReadabilityToken string
 	FeedRegistryPath string
 	Redis            struct {

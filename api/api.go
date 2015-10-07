@@ -32,17 +32,25 @@ var (
 )
 
 func articleHandler(w http.ResponseWriter, r *http.Request) {
-	articleID := mux.Vars(r)["article_id"]
-	logger.Info("[article] %s ", articleID)
+	vars := mux.Vars(r)
+	sourceSlug := vars["source_slug"]
+	articleSlug := vars["article_slug"]
+	articleID := vars["article_id"]
+	logger.Info("[article] Find for: source_slug=%s, article_slug:%s, article_id:%s", sourceSlug, articleSlug, articleID)
 
 	var article SerializedArticle
 
-	db.Select("url").Limit(1).Find(&article, articleID)
+	if db.Select("url").Where(map[string]interface{}{"id": articleID, "slug": articleSlug, "source_slug": sourceSlug}).Limit(1).Find(&article).RecordNotFound() {
+		logger.Info("[article] Not found: source_slug=%s, article_slug:%s, article_id:%s", sourceSlug, articleSlug, articleID)
+		unknownHandler(w, r)
+		return
+	}
 
-	go db.Model(&article).Where("id = ?", articleID).UpdateColumn("total_views", gorm.Expr("total_views + ?", 1))
+	go db.Model(&article).Where(map[string]interface{}{"id": articleID, "slug": articleSlug, "source_slug": sourceSlug}).UpdateColumn("total_views", gorm.Expr("total_views + ?", 1))
 
 	http.Redirect(w, r, article.Url, 301)
 }
+
 func articlesHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -87,12 +95,13 @@ func articlesHandler(w http.ResponseWriter, r *http.Request) {
 
 func unknownHandler(w http.ResponseWriter, r *http.Request) {
 	logger.Info("[404] %s %s %s", r.RemoteAddr, r.Method, r.URL)
-	http.Redirect(w, r, "http://utisak.com", http.StatusFound)
+	http.Redirect(w, r, BaseUrl, http.StatusFound)
 }
 
 func Main() {
 	config = LoadConfig()
 	BaseUrl = config.BaseUrl
+	ArticlePrefix = config.ArticlePrefix
 
 	log.LogTo(config.LogTo, config.LogLevel)
 	logger = log.NewPrefixLogger("MAIN")
@@ -100,9 +109,12 @@ func Main() {
 	db = newDb()
 	defer db.Close()
 
+	artclesPath := fmt.Sprintf("/%s", ArticlePrefix)
+	articlePath := fmt.Sprintf("/%s/{source_slug}/{article_slug}/{article_id:[0-9]+}", ArticlePrefix)
+
 	r := mux.NewRouter()
-	r.HandleFunc("/posts/{article_id}", serve(articleHandler)).Methods("GET")
-	r.HandleFunc("/posts", serve(articlesHandler)).Methods("GET")
+	r.HandleFunc(articlePath, serve(articleHandler)).Methods("GET")
+	r.HandleFunc(artclesPath, serve(articlesHandler)).Methods("GET")
 	r.NotFoundHandler = http.HandlerFunc(unknownHandler)
 
 	port := "8080" //os.Getenv("PORT")

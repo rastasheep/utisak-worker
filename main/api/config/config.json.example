@@ -2,6 +2,7 @@
   "logTo": "stdout",
   "logLevel": "DEBUG",
   "baseUrl": "http://local.go:8080",
+  "articlePrefix": "vesti",
   "postgres": {
     "host": "localhost",
     "port": "5432",

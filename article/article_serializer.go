@@ -5,9 +5,10 @@ import (
 	"time"
 )
 
-const ShareUrlTmpl = "%s/posts/%d"
+const ShareUrlTmpl = "%s/%s/%s/%s/%d"
 
 var BaseUrl string
+var ArticlePrefix string
 
 type SerializedArticle struct {
 	ID        uint      `json:"-"`
@@ -16,6 +17,7 @@ type SerializedArticle struct {
 	Date      time.Time `json:"published_at"`
 
 	Title        string `json:"title"`
+	Slug         string `json:"-"`
 	Domain       string `json:"domain"`
 	Url          string `json:"url"`
 	Author       string `json:"-"`
@@ -25,6 +27,7 @@ type SerializedArticle struct {
 	Category     string `json:"category"`
 	CategorySlug string `json:"category_slug"`
 	Source       string `json:"author"`
+	SourceSlug   string `json:"-"`
 	ShareUrl     string `json:"share_url"`
 	TotalViews   int    `json:"total_views" `
 }
@@ -34,6 +37,6 @@ func (sa SerializedArticle) TableName() string {
 }
 
 func (sa *SerializedArticle) AfterFind() (err error) {
-	sa.ShareUrl = fmt.Sprintf(ShareUrlTmpl, BaseUrl, sa.ID)
+	sa.ShareUrl = fmt.Sprintf(ShareUrlTmpl, BaseUrl, ArticlePrefix, sa.SourceSlug, sa.Slug, sa.ID)
 	return
 }

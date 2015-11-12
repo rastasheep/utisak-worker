@@ -30,6 +30,7 @@ type SerializedArticle struct {
 	SourceSlug   string `json:"-"`
 	ShareUrl     string `json:"share_url"`
 	TotalViews   int    `json:"total_views" `
+	Indexed      bool   `json:"-"`
 }
 
 func (sa SerializedArticle) TableName() string {

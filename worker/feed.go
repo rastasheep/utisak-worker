@@ -53,25 +53,3 @@ func (feed *Feed) LatestArticle() *Article {
 
 	return &article
 }
-
-type FeedItem struct {
-	rss.Item
-	Category     string
-	CategorySlug string
-	Source       string
-	SourceSlug   string
-}
-
-func (feed *FeedItem) NewArticle() *Article {
-	return &Article{
-		//ID:      feed.ID,
-		Title:        feed.Title,
-		Url:          feed.Link,
-		Excerpt:      feed.Summary,
-		Date:         feed.Date,
-		Category:     feed.Category,
-		CategorySlug: feed.CategorySlug,
-		Source:       feed.Source,
-		SourceSlug:   feed.SourceSlug,
-	}
-}

@@ -1,15 +1,12 @@
 package worker
 
 import (
-	"encoding/json"
 	"fmt"
-	"time"
 
 	. "github.com/rastasheep/utisak-worker/article"
 	log "github.com/rastasheep/utisak-worker/log"
 
 	"github.com/jinzhu/gorm"
-	"github.com/jrallison/go-workers"
 	_ "github.com/lib/pq"
 	"gopkg.in/robfig/cron.v2"
 )
@@ -19,11 +16,12 @@ var (
 	version  string
 	revision string
 
-	config       *Config
-	logger       log.Logger
-	db           *gorm.DB
-	feedRegistry *FeedRegistry
+	config *Config
+	logger log.Logger
+	db     *gorm.DB
 )
+
+const indexBatchSize = 20
 
 func Main() {
 	config = LoadConfig()
@@ -33,80 +31,51 @@ func Main() {
 	log.LogTo(config.LogTo, config.LogLevel)
 	logger = log.NewPrefixLogger("MAIN")
 
-	feedRegistry = NewFeedRegistry(config.FeedRegistryPath)
-	logger.Info("Registry: %+v", feedRegistry)
-
 	db = newDb()
 	defer db.Close()
 
-	workers.Configure(config.RedisConfig())
-	workers.Middleware.Append(&workers.MiddlewareRetry{})
-
-	workers.Process("article_fetching", articleFetchingJob, 5)
-	workers.Process("search_indexing", searchIndexingJob, 5)
-
-	go workers.StatsServer(8080)
-
-	go startCron()
-
-	workers.Run()
+	startCron()
+	wait()
 }
 
 func startCron() {
 	c := cron.New()
 	c.AddFunc("0 */5 * * * *", fetchFeeds)
+
+	if config.Swiftype.Enabled {
+		c.AddFunc("0 */6 * * * *", indexArticles)
+	}
+
 	c.Start()
 }
 
 func fetchFeeds() {
 	logger.Info("Starting to pull feeds")
 
-	feedRegistry.FetchFeeds(enqueueArticleFetchingJob)
+	worker := NewBackgroundWorker(5)
+	fetchingJob := func(item *FeedItem) { worker.Queue <- item.Fetch }
 
+	feedRegistry := NewFeedRegistry(config.FeedRegistryPath)
+	feedRegistry.FetchFeeds(fetchingJob)
+
+	worker.Process()
 	log.Info("Finished pulling feeds")
 }
 
-func enqueueArticleFetchingJob(item *FeedItem) {
-	workers.Enqueue("article_fetching", "Add", item)
-}
+func indexArticles() {
+	logger.Info("[ST] Starting to index articles")
 
-func articleFetchingJob(message *workers.Msg) {
-	var item FeedItem
+	var articles []SerializedArticle
+	db.Where("NOT indexed").Order("date desc").Limit(indexBatchSize).Find(&articles)
 
-	time.Sleep(5 * time.Second)
-
-	params := message.Args().ToJson()
-	json.Unmarshal([]byte(params), &item)
-
-	article := item.NewArticle()
-	ReadabilityParse(article.Url, &article)
-
-	db.Create(&article)
-
-	if config.Swiftype.Enabled {
-		logger.Info("[st] Enquing search indexing job")
-		enqueueSearchIndexingJob(article.ID)
+	if err := StIndexArticles(articles); err != nil {
+		logger.Info("[ST] Unable to post swiftype documents: %s", err)
 	}
 
-	logger.Info("Successfully created article: %+v\n", article)
-}
-
-func enqueueSearchIndexingJob(id uint) {
-	workers.Enqueue("search_indexing", "Add", id)
-}
-
-func searchIndexingJob(message *workers.Msg) {
-	var article SerializedArticle
-	id, _ := message.Args().Uint64()
-	logger.Info("[st] Indexing job received id: %d", id)
-
-	if db.First(&article, id).RecordNotFound() {
-		panic(fmt.Sprintf("Unable to find article for indexing: %s", id))
+	for _, article := range articles {
+		db.Model(&article).Where("id = ?", article.ID).UpdateColumn("indexed", "true")
 	}
-
-	if err := SwiftypeIndex(&article); err != nil {
-		panic(fmt.Sprintf("Unable to post swiftype document: %s", err))
-	}
+	logger.Info("[ST] Finished indexing articles")
 }
 
 func newDb() *gorm.DB {
@@ -121,4 +90,10 @@ func newDb() *gorm.DB {
 	db.LogMode(true)
 	db.AutoMigrate(&Article{})
 	return &db
+}
+
+// blocks forever
+func wait() {
+	var ch chan bool
+	<-ch
 }

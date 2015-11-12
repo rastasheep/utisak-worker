@@ -11,12 +11,13 @@ import (
 	. "github.com/rastasheep/utisak-worker/article"
 )
 
-const IndexAPI = "https://api.swiftype.com/api/v1/engines/%s/document_types/%s/documents.json"
+const IndexAPI = "https://api.swiftype.com/api/v1/engines/%s/document_types/%s/documents/bulk_create_or_update_verbose.json"
 
 type stBody struct {
-	AuthToken string     `json:"auth_token"`
-	Document  stDocument `json:"document"`
+	AuthToken string        `json:"auth_token"`
+	Documents []*stDocument `json:"documents"`
 }
+
 type stDocument struct {
 	ExternalId string    `json:"external_id"`
 	Fields     []stField `json:"fields"`
@@ -28,14 +29,17 @@ type stField struct {
 	Type  string `json:"type"`
 }
 
-func SwiftypeIndex(article *SerializedArticle) error {
-	conf := config.Swiftype
+func StIndexArticles(articles []SerializedArticle) error {
+	articlesSize := len(articles)
+	stDocuments := make([]*stDocument, articlesSize)
 
-	indexUrl := fmt.Sprintf(IndexAPI, conf.Engine, conf.DocumentType)
+	if articlesSize == 0 {
+		return nil
+	}
 
-	body := &stBody{
-		AuthToken: conf.AuthToken,
-		Document: stDocument{
+	for i := 0; i < articlesSize; i++ {
+		article := articles[i]
+		stDocuments[i] = &stDocument{
 			ExternalId: fmt.Sprintf("%d", article.ID),
 			Fields: []stField{
 				stField{Name: "title", Value: article.Title, Type: "string"},
@@ -50,7 +54,21 @@ func SwiftypeIndex(article *SerializedArticle) error {
 				stField{Name: "author", Value: article.Source, Type: "enum"},
 				stField{Name: "total_views", Value: fmt.Sprintf("%d", article.TotalViews), Type: "integer"},
 			},
-		}}
+		}
+	}
+
+	return indexStDocuments(stDocuments)
+}
+
+func indexStDocuments(stDocuments []*stDocument) error {
+	conf := config.Swiftype
+
+	indexUrl := fmt.Sprintf(IndexAPI, conf.Engine, conf.DocumentType)
+
+	body := &stBody{
+		AuthToken: conf.AuthToken,
+		Documents: stDocuments,
+	}
 
 	jsonBody, err := json.Marshal(body)
 	if err != nil {

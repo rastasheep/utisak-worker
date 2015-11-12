@@ -16,13 +16,7 @@ type Config struct {
 	ArticlePrefix    string
 	ReadabilityToken string
 	FeedRegistryPath string
-	Redis            struct {
-		Domain   string
-		Database string
-		Pool     string
-		Process  string
-	}
-	Postgres struct {
+	Postgres         struct {
 		Host     string
 		Port     string
 		Database string
@@ -53,15 +47,6 @@ func LoadFile(path string, dest interface{}) {
 
 	if err = json.Unmarshal(raw, &dest); err != nil {
 		panic(fmt.Sprintf("Could not unmarshal config file: %v", err))
-	}
-}
-
-func (config *Config) RedisConfig() map[string]string {
-	return map[string]string{
-		"server":   config.Redis.Domain,
-		"database": config.Redis.Database,
-		"pool":     config.Redis.Pool,
-		"process":  config.Redis.Process,
 	}
 }
 

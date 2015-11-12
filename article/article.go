@@ -28,6 +28,7 @@ type Article struct {
 	Source       string `sql:"index:idx_category_source"`
 	SourceSlug   string `sql:"index:idx_id_source_slug"`
 	TotalViews   int    `sql:"default:0"`
+	Indexed      bool   `sql:"default:false"`
 }
 
 func (a *Article) BeforeCreate() (err error) {

@@ -1,13 +1,5 @@
 {
   "logTo": "stdout",
   "logLevel": "DEBUG",
-  "baseUrl": "http://localhost:8080",
-  "postgres": {
-    "host": "localhost",
-    "port": "5432",
-    "database": "utisak_development",
-    "username": "developer",
-    "password": "developer"
-  }
-
+  "baseUrl": "http://localhost:8080"
 }

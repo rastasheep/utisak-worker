@@ -1,0 +1,12 @@
+FROM scratch
+MAINTAINER Aleksandar Diklic <rastasheep@gmail.com>
+
+ADD ca-certificates.crt /etc/ssl/certs/
+
+ADD packaging/worker/root/usr/local/bin/utisak-worker /worker
+ADD main/worker/config/config.json /config.json
+ADD main/worker/config/feeds.json /feeds.json
+
+EXPOSE 8080
+
+CMD ["/worker", "--config=config.json"]

@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"os"
 )
 
 var configPath = flag.String("config", "config/config.json", "Path to configuration file")
@@ -16,14 +17,7 @@ type Config struct {
 	ArticlePrefix    string
 	ReadabilityToken string
 	FeedRegistryPath string
-	Postgres         struct {
-		Host     string
-		Port     string
-		Database string
-		Username string
-		Password string
-	}
-	Swiftype struct {
+	Swiftype         struct {
 		Enabled      bool
 		AuthToken    string
 		Engine       string
@@ -52,10 +46,10 @@ func LoadFile(path string, dest interface{}) {
 
 func (config *Config) PostgresConfig() string {
 	return fmt.Sprintf("sslmode=disable host=%s port=%s dbname=%s user=%s password=%s",
-		config.Postgres.Host,
-		config.Postgres.Port,
-		config.Postgres.Database,
-		config.Postgres.Username,
-		config.Postgres.Password,
+		os.Getenv("POSTGRES_SERVICE_HOST"),
+		os.Getenv("POSTGRES_SERVICE_PORT"),
+		os.Getenv("POSTGRES_DATABASE"),
+		os.Getenv("POSTGRES_USERNAME"),
+		os.Getenv("POSTGRES_PASSWORD"),
 	)
 }

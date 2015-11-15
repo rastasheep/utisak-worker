@@ -2,13 +2,5 @@
   "logTo": "stdout",
   "logLevel": "DEBUG",
   "baseUrl": "http://local.go:8080",
-  "articlePrefix": "vesti",
-  "postgres": {
-    "host": "localhost",
-    "port": "5432",
-    "database": "utisak_development",
-    "username": "developer",
-    "password": "developer"
-  }
-
+  "articlePrefix": "vesti"
 }

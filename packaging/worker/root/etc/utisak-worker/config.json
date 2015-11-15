@@ -4,13 +4,6 @@
   "baseUrl": "http://localhost:8080",
   "feedRegistryPath": "/etc/utisak-worker/feeds.json",
   "readabilityToken": "123",
-  "postgres": {
-    "host": "localhost",
-    "port": "5432",
-    "database": "utisak_development",
-    "username": "developer",
-    "password": "developer"
-  },
   "swiftype":{
     "enabled": false,
     "authToken": "123",

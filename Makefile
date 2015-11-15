@@ -8,11 +8,17 @@ build:
 	mkdir -p packaging/output
 	mkdir -p packaging/worker/root/usr/local/bin
 	mkdir -p packaging/api/root/usr/local/bin
+
+	CGO_ENABLED=0 GOOS=linux \
 	go build -o packaging/worker/root/usr/local/bin/utisak-worker \
-		-ldflags "-X main.revision $(SHA) -X main.version $(VERSION)" \
+		-ldflags "-s -X main.revision $(SHA) -X main.version $(VERSION)" \
+		-a -installsuffix cgo \
 		github.com/rastasheep/utisak-worker/main/worker
+
+	CGO_ENABLED=0 GOOS=linux \
 	go build -o packaging/api/root/usr/local/bin/utisak-api \
-		-ldflags "-X main.revision $(SHA) -X main.version $(VERSION)" \
+		-ldflags "-s -X main.revision $(SHA) -X main.version $(VERSION)" \
+		-a -installsuffix cgo \
 		github.com/rastasheep/utisak-worker/main/api
 
 test:

@@ -13,6 +13,7 @@ type Feed struct {
 	CategorySlug string `json:"category_slug"`
 	Source       string
 	SourceSlug   string `json:"source_slug"`
+	Parser       string
 	RawData      *rss.Feed
 }
 
@@ -33,7 +34,7 @@ func (feed *Feed) Fetch() error {
 
 func (feed *Feed) ProcessNewItems(latest time.Time, action func(*FeedItem)) {
 	for _, item := range feed.RawData.Items {
-		feedItem := &FeedItem{*item, feed.Category, feed.CategorySlug, feed.Source, feed.SourceSlug}
+		feedItem := &FeedItem{*item, feed.Category, feed.CategorySlug, feed.Source, feed.SourceSlug, feed.Parser}
 
 		logger.Info("Checking item time: %v latest: %v", feedItem.Date.UTC(), latest.UTC())
 		if feedItem.Date.UTC().After(latest.UTC()) {

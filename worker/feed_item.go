@@ -5,6 +5,7 @@ import (
 
 	"github.com/SlyMarbo/rss"
 	. "github.com/rastasheep/utisak-worker/article"
+	"github.com/rastasheep/utisak-worker/worker/parser"
 )
 
 type FeedItem struct {
@@ -13,13 +14,21 @@ type FeedItem struct {
 	CategorySlug string
 	Source       string
 	SourceSlug   string
+	Parser       string
 }
 
 func (item *FeedItem) Fetch() {
 	time.Sleep(3 * time.Second)
 
 	article := item.newArticle()
-	ReadabilityParse(article.Url, &article)
+
+	parser, err := parser.Get(item.Parser)
+	if err != nil {
+		logger.Error("FeedItem: unknown driver %q", item.Parser)
+		return
+	}
+
+	parser.Parse(article.Url, &article)
 
 	db.Create(&article)
 

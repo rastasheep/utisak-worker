@@ -14,7 +14,7 @@ var (
 )
 
 type Parser interface {
-	Parse(url string, target interface{}) error
+	Parse(url string) ([]byte, error)
 }
 
 // Register makes a parser driver available by the provided name.

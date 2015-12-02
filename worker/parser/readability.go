@@ -1,25 +1,31 @@
 package parser
 
 import (
-	"encoding/json"
-	"fmt"
+	"io/ioutil"
 	"net/http"
+	"net/url"
 	"os"
 )
 
-const ParserAPI = "http://readability.com/api/content/v1/parser?url=%s&token=%s"
+const ReadabilityAPI = "http://readability.com/api/content/v1/parser"
 
 type readability struct{}
 
-func (parser *readability) Parse(url string, target interface{}) error {
-	apiUrl := fmt.Sprintf(ParserAPI, url, os.Getenv("READABILITY_PASSWORD"))
-	r, err := http.Get(apiUrl)
-	if err != nil {
-		return err
-	}
+func (parser *readability) Parse(sourceUrl string) ([]byte, error) {
+	fullUrl, _ := url.Parse(ReadabilityAPI)
+	parameters := url.Values{}
+	parameters.Add("url", sourceUrl)
+	parameters.Add("token", os.Getenv("READABILITY_PASSWORD"))
+	fullUrl.RawQuery = parameters.Encode()
+
+	r, err := http.Get(fullUrl.String())
 	defer r.Body.Close()
 
-	return json.NewDecoder(r.Body).Decode(target)
+	if err != nil {
+		return nil, err
+	}
+
+	return ioutil.ReadAll(r.Body)
 }
 
 func init() {

@@ -1,6 +1,7 @@
 package worker
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/SlyMarbo/rss"
@@ -28,7 +29,17 @@ func (item *FeedItem) Fetch() {
 		return
 	}
 
-	parser.Parse(article.Url, &article)
+	articleData, err := parser.Parse(article.Url)
+	if err != nil {
+		logger.Error("FeedItem: error parsing article data %q", err)
+		return
+	}
+
+	err = json.Unmarshal(articleData, article)
+	if err != nil {
+		logger.Error("FeedItem: failed to unmarshal article data %q", err)
+		return
+	}
 
 	db.Create(&article)
 

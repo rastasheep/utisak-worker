@@ -29,7 +29,7 @@ func (item *FeedItem) Fetch() {
 		return
 	}
 
-	articleData, err := parser.Parse(article.Url)
+	articleData, err := parser.Fetch(article.Url)
 	if err != nil {
 		logger.Error("FeedItem: error parsing article data %q", err)
 		return

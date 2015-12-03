@@ -29,7 +29,7 @@ type CopyistArticle struct {
 	Image CopyistImage `json:"image"`
 }
 
-func (article *CopyistArticle) Populate() {
+func (article *CopyistArticle) populate() {
 	article.LeadImage = article.Image.Url
 	article.Text = strings.Trim(article.Text, "\n ")
 	article.Text = strings.Replace(article.Text, "\n", " ", -1)
@@ -46,7 +46,7 @@ func (article *CopyistArticle) Populate() {
 	return
 }
 
-func (parser *copyist) Parse(sourceUrl string) ([]byte, error) {
+func (parser *copyist) Fetch(sourceUrl string) ([]byte, error) {
 	fullUrl, _ := url.Parse(UtisakParserAPI)
 	parameters := url.Values{}
 	parameters.Add("url", sourceUrl)
@@ -64,7 +64,7 @@ func (parser *copyist) Parse(sourceUrl string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	article.Populate()
+	article.populate()
 
 	return json.Marshal(article)
 }

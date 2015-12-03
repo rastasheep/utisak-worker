@@ -11,7 +11,7 @@ const ReadabilityAPI = "http://readability.com/api/content/v1/parser"
 
 type readability struct{}
 
-func (parser *readability) Parse(sourceUrl string) ([]byte, error) {
+func (parser *readability) Fetch(sourceUrl string) ([]byte, error) {
 	fullUrl, _ := url.Parse(ReadabilityAPI)
 	parameters := url.Values{}
 	parameters.Add("url", sourceUrl)

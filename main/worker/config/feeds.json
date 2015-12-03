@@ -4,13 +4,15 @@
     "category": "Sport",
     "category_slug": "sport",
     "source": "Politika",
-    "source_slug": "politika"
+    "source_slug": "politika",
+    "parser": "readability"
   },
   {
     "url": "http://www.politika.rs/rubrike/Kultura/index.1.lt.xml",
     "category": "Kultura",
     "category_slug": "kultura",
     "source": "Politika",
-    "source_slug": "politika"
+    "source_slug": "politika",
+    "parser": "readability"
   }
 ]

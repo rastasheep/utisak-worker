@@ -30,3 +30,4 @@ bin/
 packaging/output/*
 packaging/api/root/usr/local/bin/utisak-api
 packaging/worker/root/usr/local/bin/utisak-worker
+feeds.json

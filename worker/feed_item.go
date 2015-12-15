@@ -11,11 +11,7 @@ import (
 
 type FeedItem struct {
 	rss.Item
-	Category     string
-	CategorySlug string
-	Source       string
-	SourceSlug   string
-	Parser       string
+	Feed
 }
 
 func (item *FeedItem) Fetch() {
@@ -23,10 +19,14 @@ func (item *FeedItem) Fetch() {
 
 	article := item.newArticle()
 
-	parser, err := parser.Get(item.Parser)
+	parser, err := parser.Get(item.Feed.Parser)
 	if err != nil {
-		logger.Error("FeedItem: unknown driver %q", item.Parser)
+		logger.Error("FeedItem: unknown driver %q", item.Feed.Parser)
 		return
+	}
+
+	if item.Feed.Options != nil {
+		parser.SetOptions(*item.Feed.Options)
 	}
 
 	articleData, err := parser.Fetch(article.Url)
@@ -46,16 +46,16 @@ func (item *FeedItem) Fetch() {
 	logger.Info("Successfully created article: %+v\n", article)
 }
 
-func (feed *FeedItem) newArticle() *Article {
+func (item *FeedItem) newArticle() *Article {
 	return &Article{
 		//ID:      feed.ID,
-		Title:        feed.Title,
-		Url:          feed.Link,
-		Excerpt:      feed.Summary,
-		Date:         feed.Date,
-		Category:     feed.Category,
-		CategorySlug: feed.CategorySlug,
-		Source:       feed.Source,
-		SourceSlug:   feed.SourceSlug,
+		Title:        item.Title,
+		Url:          item.Link,
+		Excerpt:      item.Summary,
+		Date:         item.Date,
+		Category:     item.Feed.Category,
+		CategorySlug: item.Feed.CategorySlug,
+		Source:       item.Feed.Source,
+		SourceSlug:   item.Feed.SourceSlug,
 	}
 }

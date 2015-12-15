@@ -5,6 +5,7 @@ import (
 
 	"github.com/SlyMarbo/rss"
 	. "github.com/rastasheep/utisak-worker/article"
+	"github.com/rastasheep/utisak-worker/worker/parser"
 )
 
 type Feed struct {
@@ -15,6 +16,7 @@ type Feed struct {
 	SourceSlug   string `json:"source_slug"`
 	Parser       string
 	RawData      *rss.Feed
+	Options      *parser.ParserOptions
 }
 
 func (feed *Feed) Fetch() error {
@@ -34,7 +36,7 @@ func (feed *Feed) Fetch() error {
 
 func (feed *Feed) ProcessNewItems(latest time.Time, action func(*FeedItem)) {
 	for _, item := range feed.RawData.Items {
-		feedItem := &FeedItem{*item, feed.Category, feed.CategorySlug, feed.Source, feed.SourceSlug, feed.Parser}
+		feedItem := &FeedItem{*item, *feed}
 
 		logger.Info("Checking item time: %v latest: %v", feedItem.Date.UTC(), latest.UTC())
 		if feedItem.Date.UTC().After(latest.UTC()) {

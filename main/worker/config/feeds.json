@@ -1,18 +1,21 @@
 [
   {
-    "url": "http://www.politika.rs/rubrike/Sport/index.1.lt.xml",
+    "url": "http://www.novosti.rs/rss/rss-sport",
     "category": "Sport",
     "category_slug": "sport",
-    "source": "Politika",
-    "source_slug": "politika",
-    "parser": "readability"
+    "source": "Novosti",
+    "source_slug": "novosti",
+    "parser": "utisak-parser",
+    "options": {
+      "language": "sr"
+    }
   },
   {
-    "url": "http://www.politika.rs/rubrike/Kultura/index.1.lt.xml",
+    "url": "http://www.novosti.rs/rss/rss-kultura",
     "category": "Kultura",
     "category_slug": "kultura",
-    "source": "Politika",
-    "source_slug": "politika",
-    "parser": "readability"
+    "source": "Novosti",
+    "source_slug": "novosti",
+    "parser": "utisak-parser"
   }
 ]

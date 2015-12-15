@@ -15,6 +15,11 @@ var (
 
 type Parser interface {
 	Fetch(url string) ([]byte, error)
+	SetOptions(option ParserOptions)
+}
+
+type ParserOptions struct {
+	Language string
 }
 
 // Register makes a parser driver available by the provided name.

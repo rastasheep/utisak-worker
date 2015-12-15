@@ -9,7 +9,13 @@ import (
 
 const ReadabilityAPI = "http://readability.com/api/content/v1/parser"
 
-type readability struct{}
+type readability struct {
+	Options ParserOptions
+}
+
+func (parser *readability) SetOptions(options ParserOptions) {
+	parser.Options = options
+}
 
 func (parser *readability) Fetch(sourceUrl string) ([]byte, error) {
 	fullUrl, _ := url.Parse(ReadabilityAPI)

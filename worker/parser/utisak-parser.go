@@ -9,7 +9,9 @@ import (
 
 const UtisakParserAPI = "http://parser.utisak.com/v1"
 
-type copyist struct{}
+type copyist struct {
+	Options ParserOptions
+}
 
 type CopyistImage struct {
 	Type   string
@@ -50,6 +52,9 @@ func (parser *copyist) Fetch(sourceUrl string) ([]byte, error) {
 	fullUrl, _ := url.Parse(UtisakParserAPI)
 	parameters := url.Values{}
 	parameters.Add("url", sourceUrl)
+	if parser.Options.Language != "" {
+		parameters.Add("lang", parser.Options.Language)
+	}
 	fullUrl.RawQuery = parameters.Encode()
 
 	r, err := http.Get(fullUrl.String())
@@ -67,6 +72,10 @@ func (parser *copyist) Fetch(sourceUrl string) ([]byte, error) {
 	article.populate()
 
 	return json.Marshal(article)
+}
+
+func (parser *copyist) SetOptions(options ParserOptions) {
+	parser.Options = options
 }
 
 func init() {

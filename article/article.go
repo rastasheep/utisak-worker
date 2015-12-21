@@ -16,7 +16,7 @@ type Article struct {
 	Title     string `json:"-"`
 	Slug      string `sql:"index:idx_id_source_slug"`
 	Domain    string
-	Url       string
+	Url       string `sql:"unique_index"`
 	Author    string
 	Excerpt   string
 	WordCount int `json:"word_count"`

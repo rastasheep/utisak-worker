@@ -22,6 +22,7 @@ var (
 )
 
 const indexBatchSize = 20
+const reFetchBatchSize = 20
 
 func Main() {
 	config = LoadConfig()
@@ -41,6 +42,7 @@ func Main() {
 func startCron() {
 	c := cron.New()
 	c.AddFunc("0 */5 * * * *", fetchFeeds)
+	c.AddFunc("0 */6 * * * *", reFetchFeeds)
 
 	if config.Swiftype.Enabled {
 		c.AddFunc("0 */6 * * * *", indexArticles)
@@ -60,6 +62,32 @@ func fetchFeeds() {
 
 	worker.Process()
 	log.Info("Finished pulling feeds")
+}
+
+func reFetchFeeds() {
+	logger.Info("[RF] Starting to re-fetching feeds")
+
+	var articles []Article
+	feedRegistry := NewFeedRegistry(config.FeedRegistryPath)
+
+	db.Where("refetch").Order("date desc").Limit(reFetchBatchSize).Find(&articles)
+
+	for _, article := range articles {
+		feed, err := feedRegistry.FindFeed(article.SourceSlug, article.CategorySlug)
+
+		if err != nil {
+			logger.Info("[RF] %s", err)
+			continue
+		}
+
+		if err := FetchArticle(feed, &article); err != nil {
+			logger.Info("[RF] Unable to fetch article: %s", err)
+		}
+
+		db.Model(&article).UpdateColumn("refetch", "false")
+	}
+
+	log.Info("[RF] Finished re-fetching feeds")
 }
 
 func indexArticles() {

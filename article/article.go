@@ -29,6 +29,7 @@ type Article struct {
 	SourceSlug   string `sql:"index:idx_id_source_slug"`
 	TotalViews   int    `sql:"default:0"`
 	Indexed      bool   `sql:"default:false"`
+	Refetch      bool   `sql:"default:false"`
 }
 
 func (a *Article) BeforeCreate() (err error) {

@@ -51,6 +51,26 @@ func articleHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, article.Url, 301)
 }
 
+func reFetchArticleHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	sourceSlug := vars["source_slug"]
+	articleSlug := vars["article_slug"]
+	articleID := vars["article_id"]
+	logger.Info("[article] Find for: source_slug=%s, article_slug:%s, article_id:%s", sourceSlug, articleSlug, articleID)
+
+	var article SerializedArticle
+
+	if db.Select("url").Where(map[string]interface{}{"id": articleID, "slug": articleSlug, "source_slug": sourceSlug}).Limit(1).Find(&article).RecordNotFound() {
+		logger.Info("[article] Not found: source_slug=%s, article_slug:%s, article_id:%s", sourceSlug, articleSlug, articleID)
+		unknownHandler(w, r)
+		return
+	}
+
+	go db.Model(&article).Where(map[string]interface{}{"id": articleID, "slug": articleSlug, "source_slug": sourceSlug}).UpdateColumn("refetch", "true")
+
+	w.WriteHeader(200)
+}
+
 func articlesHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -114,6 +134,7 @@ func Main() {
 
 	r := mux.NewRouter()
 	r.HandleFunc(articlePath, serve(articleHandler)).Methods("GET")
+	r.HandleFunc(articlePath, serve(reFetchArticleHandler)).Methods("PUT")
 	r.HandleFunc(artclesPath, serve(articlesHandler)).Methods("GET")
 	r.NotFoundHandler = http.HandlerFunc(unknownHandler)
 

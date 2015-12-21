@@ -84,7 +84,7 @@ func reFetchFeeds() {
 			logger.Info("[RF] Unable to fetch article: %s", err)
 		}
 
-		db.Model(&article).UpdateColumn("refetch", "true")
+		db.Model(&article).UpdateColumn("refetch", "false")
 	}
 
 	log.Info("[RF] Finished re-fetching feeds")

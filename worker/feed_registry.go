@@ -25,7 +25,7 @@ func (registry *FeedRegistry) FetchFeeds(action func(*FeedItem)) {
 		err := feed.Fetch()
 		if err != nil {
 			registry.Logger.Error("Failed to fetch feed: %s reason: %s", feed.Url, err.Error())
-			return
+			continue
 		}
 
 		article := feed.LatestArticle()

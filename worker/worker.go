@@ -57,7 +57,7 @@ func fetchFeeds() {
 	worker := NewBackgroundWorker(5)
 	fetchingJob := func(item *FeedItem) { worker.Queue <- item.Fetch }
 
-	feedRegistry := NewFeedRegistry(config.FeedRegistryPath)
+	feedRegistry := NewFeedRegistry(config.Feeds)
 	feedRegistry.FetchFeeds(fetchingJob)
 
 	worker.Process()
@@ -68,7 +68,7 @@ func reFetchFeeds() {
 	logger.Info("[RF] Starting to re-fetching feeds")
 
 	var articles []Article
-	feedRegistry := NewFeedRegistry(config.FeedRegistryPath)
+	feedRegistry := NewFeedRegistry(config.Feeds)
 
 	db.Where("refetch").Order("date desc").Limit(reFetchBatchSize).Find(&articles)
 

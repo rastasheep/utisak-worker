@@ -4,7 +4,6 @@
   "baseUrl": "http://localhost:8080",
   "articlePrefix": "vesti",
   "feedRegistryPath": "config/feeds.json",
-  "readabilityToken": "3e7f364243ee793537a556b6dee3eed86a045e71",
   "swiftype":{
     "enabled": false,
     "authToken": "123",

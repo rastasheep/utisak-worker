@@ -11,18 +11,19 @@ import (
 var configPath = flag.String("config", "config/config.json", "Path to configuration file")
 
 type Config struct {
-	LogTo            string
-	LogLevel         string
-	BaseUrl          string
-	ArticlePrefix    string
-	ReadabilityToken string
-	FeedRegistryPath string
-	Swiftype         struct {
-		Enabled      bool
-		AuthToken    string
-		Engine       string
-		DocumentType string
-	}
+	LogTo         string
+	LogLevel      string
+	BaseUrl       string
+	ArticlePrefix string
+	Swiftype      Swiftype
+	Feeds         []*Feed
+}
+
+type Swiftype struct {
+	Enabled      bool
+	AuthToken    string
+	Engine       string
+	DocumentType string
 }
 
 func LoadConfig() *Config {
@@ -52,4 +53,10 @@ func (config *Config) PostgresConfig() string {
 		os.Getenv("POSTGRES_USERNAME"),
 		os.Getenv("POSTGRES_PASSWORD"),
 	)
+}
+
+func (config *Config) SwiftypeConfig() Swiftype {
+	swiftype := config.Swiftype
+	swiftype.AuthToken = os.Getenv("SWIFTYPE_TOKEN")
+	return swiftype
 }

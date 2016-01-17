@@ -11,11 +11,11 @@ type FeedRegistry struct {
 	Logger log.Logger
 }
 
-func NewFeedRegistry(sourcePath string) *FeedRegistry {
+func NewFeedRegistry(feeds []*Feed) *FeedRegistry {
 	var registry FeedRegistry
 
 	registry.Logger = log.NewPrefixLogger("REGISTRY")
-	LoadFile(config.FeedRegistryPath, &registry.Feeds)
+	registry.Feeds = feeds
 
 	return &registry
 }

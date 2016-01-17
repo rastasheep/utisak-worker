@@ -61,7 +61,7 @@ func StIndexArticles(articles []SerializedArticle) error {
 }
 
 func indexStDocuments(stDocuments []*stDocument) error {
-	conf := config.Swiftype
+	conf := config.SwiftypeConfig()
 
 	indexUrl := fmt.Sprintf(IndexAPI, conf.Engine, conf.DocumentType)
 

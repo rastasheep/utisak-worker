@@ -21,7 +21,7 @@ type Feed struct {
 
 func (feed *Feed) Fetch() error {
 	var err error
-	logger.Info("Stearted fetching field: %s", feed.Url)
+	logger.Info("Started fetching feed: %s", feed.Url)
 
 	rss.CacheParsedItemIDs(false)
 	feed.RawData, err = rss.Fetch(feed.Url)
@@ -29,7 +29,7 @@ func (feed *Feed) Fetch() error {
 		return err
 	}
 
-	logger.Info("Finished fetching field: %s", feed.Url)
+	logger.Info("Finished fetching feed: %s", feed.Url)
 	logger.Info("There are %d items in %s", len(feed.RawData.Items), feed.Url)
 	return nil
 }
@@ -38,7 +38,7 @@ func (feed *Feed) ProcessNewItems(latest time.Time, action func(*FeedItem)) {
 	for _, item := range feed.RawData.Items {
 		feedItem := &FeedItem{*item, *feed}
 
-		logger.Info("Checking item time: %v latest: %v", feedItem.Date.UTC(), latest.UTC())
+		logger.Info("Item time: %v latest article time for source: %v", feedItem.Date.UTC(), latest.UTC())
 		if feedItem.Date.UTC().After(latest.UTC()) {
 			logger.Info("Enquing new item")
 			action(feedItem)

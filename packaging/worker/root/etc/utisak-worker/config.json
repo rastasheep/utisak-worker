@@ -3,7 +3,6 @@
   "logLevel": "DEBUG",
   "baseUrl": "http://localhost:8080",
   "feedRegistryPath": "/etc/utisak-worker/feeds.json",
-  "readabilityToken": "123",
   "swiftype":{
     "enabled": false,
     "authToken": "123",

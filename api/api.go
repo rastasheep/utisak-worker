@@ -4,9 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"reflect"
-	"strconv"
-	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -14,11 +11,6 @@ import (
 	_ "github.com/lib/pq"
 	. "github.com/rastasheep/utisak-worker/article"
 	log "github.com/rastasheep/utisak-worker/log"
-)
-
-const (
-	perPage = 20
-	allCat  = "all"
 )
 
 var (
@@ -76,35 +68,16 @@ func articlesHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
 
-	category := strings.Split(r.FormValue("category"), ",")
-	category = deleteEmpty(category)
-
-	page, err := strconv.ParseInt(r.FormValue("page"), 10, 64)
-	if err != nil {
-		page = 0
-	}
-
-	sort := r.FormValue("sort")
-
 	var articles []SerializedArticle
-	searchRelation := db
 
-	if len(category) != 0 && !Contains(category, allCat) {
-		searchRelation = searchRelation.Where("category_slug IN (?)", category)
+	params := &QueryParams{
+		CategoryStr: r.FormValue("category"),
+		PageStr:     r.FormValue("page"),
+		Sort:        r.FormValue("sort"),
 	}
+	params.Parse()
 
-	if page > 1 {
-		searchRelation = searchRelation.Offset((page - 1) * perPage)
-	}
-
-	if sort == "newest" {
-		searchRelation = searchRelation.Order("date desc")
-	} else {
-		searchRelation = searchRelation.Order("(total_views / POW(((EXTRACT(EPOCH FROM (now()-date)) / 3600)::integer + 2), 1.5)) desc")
-	}
-
-	searchRelation.Limit(perPage).Find(&articles)
-
+	params.PrepareQuery(db).Find(&articles)
 	categories := GetCategories()
 
 	if resp, err := json.Marshal(&Response{Categories: categories, Articles: articles}); err == nil {
@@ -168,28 +141,4 @@ func serve(fn func(http.ResponseWriter, *http.Request)) http.HandlerFunc {
 
 		logger.Info("%v %s %s", elapsed, r.Method, r.RequestURI)
 	}
-}
-
-func deleteEmpty(s []string) []string {
-	var r []string
-	if len(s) == 0 {
-		return s
-	}
-	for _, str := range s {
-		if str != "" {
-			r = append(r, str)
-		}
-	}
-	return r
-}
-
-func Contains(slice interface{}, val interface{}) bool {
-	sv := reflect.ValueOf(slice)
-
-	for i := 0; i < sv.Len(); i++ {
-		if sv.Index(i).Interface() == val {
-			return true
-		}
-	}
-	return false
 }

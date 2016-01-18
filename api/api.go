@@ -71,9 +71,11 @@ func articlesHandler(w http.ResponseWriter, r *http.Request) {
 	var articles []SerializedArticle
 
 	params := &QueryParams{
-		CategoryStr: r.FormValue("category"),
-		PageStr:     r.FormValue("page"),
-		Sort:        r.FormValue("sort"),
+		CategoryStr:  r.FormValue("category"),
+		PageStr:      r.FormValue("page"),
+		Sort:         r.FormValue("sort"),
+		StartDateStr: r.FormValue("start-date"),
+		EndDateStr:   r.FormValue("end-date"),
 	}
 	params.Parse()
 
